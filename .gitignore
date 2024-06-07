@@ -1,0 +1,19 @@
+# python generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# venv
+.venv
+
+.python-version
+
+.env
+
+kasa_buttons.toml
+kasabuttons.toml
+
+.coverage

@@ -1,0 +1,13 @@
+refresh_frequency = 0
+discovery_timeout = 10
+
+[buttons]]
+button_text = "a"
+device_name = "Smart Bulb1"
+long_press = "dim+"
+short_press = "toggle"
+dim_states = [15, 50, 100]
+
+[[logging.handlers]]
+sink = "ext://sys.stderr"
+format = "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
