@@ -1,11 +1,10 @@
-import asyncio
-
 from kasa import Device, DeviceConfig, Discover, KasaException
 from loguru import logger
 
+from .buttons import ButtonEvent
 from .configuration import Configuration, DeviceAction
 from .kasa_utils import async_wrapped_device
-from .keyboard_handler import AsyncKeyboardStatus, ButtonEvent
+from .keyboard_handlers.base_handler import BaseAsyncKeyboardStatus
 
 
 class KasaButtonsCore:
@@ -17,10 +16,11 @@ class KasaButtonsCore:
         self._button_device_mapping = {}
         self._last_device_config = None
         self._button_queue = None
+        self._keyboard_handler_instance = None
 
     @classmethod
     async def create(
-        cls, configuration: Configuration, button_queue: asyncio.Queue | None = None
+        cls, configuration: Configuration, keyboard_handler: BaseAsyncKeyboardStatus
     ):
         """
         async class method to create a new KasaButtonCore instance and
@@ -28,25 +28,23 @@ class KasaButtonsCore:
         and connecting up with the AsyncKeyboardStatus handler.
         """
         self = cls(configuration)
-        self._button_queue = (
-            button_queue
-            if button_queue is not None
-            else AsyncKeyboardStatus.keyboard_button_handler(
-                chars=self._button_actions.keys()
-            )
+        self._button_queue, self._keyboard_handler_instance = (
+            keyboard_handler.keyboard_button_handler(chars=self._button_actions.keys())
         )
         await self.update_device_list()
         return self
 
     @classmethod
     async def run(
-        cls, configuration: Configuration, button_queue: asyncio.Queue | None = None
+        cls, configuration: Configuration, keyboard_handler: BaseAsyncKeyboardStatus
     ):
         """
         comprehensive method that async sets up a new instance, initializes the device
         list and then enters the loop waiting on events.
         """
-        self = await cls.create(configuration=configuration, button_queue=button_queue)
+        self = await cls.create(
+            configuration=configuration, keyboard_handler=keyboard_handler
+        )
         await self.loop()
 
     def _get_device_config(self, character: str) -> DeviceConfig | None:

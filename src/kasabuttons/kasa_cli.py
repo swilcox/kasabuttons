@@ -1,4 +1,5 @@
 import asyncio
+import platform
 
 import click
 from loguru import logger
@@ -6,6 +7,16 @@ from loguru_config import LoguruConfig
 
 from .configuration import Configuration
 from .core import KasaButtonsCore
+
+if platform.system().lower() == "darwin":
+    from .keyboard_handlers.pynput_handler import (
+        PynputAsyncKeyboardStatus as AsyncKeyboardStatus,
+    )
+else:
+    from .keyboard_handlers.keyboard_handler import (
+        KeyboardAsyncKeyboardStatus as AsyncKeyboardStatus,
+    )
+
 
 DEFAULT_CONFIG = "kasabuttons.toml"
 
@@ -23,6 +34,9 @@ def main(config):
     if configuration.logging:
         LoguruConfig.load(configuration.logging.model_dump())
     logger.debug(f"configuration: {configuration}")
-    asyncio.run(KasaButtonsCore.run(configuration=configuration))
-    # asyncio.run(main_loop(configuration=configuration))
+    asyncio.run(
+        KasaButtonsCore.run(
+            configuration=configuration, keyboard_handler=AsyncKeyboardStatus
+        )
+    )
     logger.info("kasabuttons CLI Exiting")

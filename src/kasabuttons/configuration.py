@@ -8,7 +8,7 @@ from kasa import Credentials
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from .keyboard_handler import ButtonEvent
+from .buttons import ButtonEvent
 
 
 class DeviceAction(Enum):
