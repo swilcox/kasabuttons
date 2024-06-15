@@ -1,8 +1,11 @@
 from dataclasses import dataclass
+from unittest.mock import patch
 
 import pytest
+from kasabuttons.buttons import ButtonEvent
 from kasabuttons.configuration import Configuration, DeviceAction
 from kasabuttons.core import KasaButtonsCore
+from kasabuttons.keyboard_handlers.base_handler import BaseAsyncKeyboardStatus
 
 
 @dataclass
@@ -19,6 +22,38 @@ class MockDevice:
 
     async def set_brightness(self, value: int):
         self.state_information["Brightness"] = value
+
+    async def update(self, *args, **kwargs):
+        pass
+
+    @classmethod
+    async def connect(cls, *args, **kwargs):
+        if len(args):
+            return cls(**args[0])
+        return cls(kwargs)
+
+    async def disconnect(self):
+        pass
+
+    @property
+    def config(self):
+        """property that returns all we need to recreate a new device instance"""
+        return {
+            "alias": self.alias,
+            "is_off": self.is_off,
+            "state_information": self.state_information,
+        }
+
+
+class MockDiscover:
+    @classmethod
+    async def discover(cls, *arg, **kwargs):
+        return {
+            "mockbulb": MockDevice(
+                "mockbulb", is_off=False, state_information={"Brightness": 100}
+            ),
+            "mockplug": MockDevice("mockplug", is_off=False, state_information={}),
+        }
 
 
 @pytest.fixture
@@ -103,5 +138,28 @@ async def test_non_standard_brightness(test_configuration):
     assert mock_device.state_information["Brightness"] == 10
 
 
-# TODO: mock kasa device discovery or use dependency injection to handle fake devices
-# TODO: mock asyncio.Queue (or use our own queue) to send "events" to the core loop
+@pytest.mark.asyncio
+async def test_create_core_and_loop(test_configuration):
+    with patch("kasabuttons.core.Discover", MockDiscover):
+        core = await KasaButtonsCore.create(
+            test_configuration, keyboard_handler=BaseAsyncKeyboardStatus
+        )
+        assert core is not None
+        core._button_queue.put_nowait(ButtonEvent(long_press=False, character="exit"))
+        await core.loop()
+        assert True
+
+
+@pytest.mark.asyncio
+async def test_mock_connect():
+    """just to verify that our mock device config and connect work together properly"""
+    m = MockDevice("mydevice", False, {"something": "else"})
+    new_m = await MockDevice.connect(m.config)
+    assert m.config == new_m.config
+
+
+# TODO: further mock devices/discover to track devices... essentially mock kasa status
+# tests:
+# * toggle
+# * dim plus and minus
+# * ~last~ functionality
