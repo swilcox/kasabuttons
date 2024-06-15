@@ -1,6 +1,6 @@
 [project]
 name = "kasabuttons"
-version = "0.1.0"
+version = "0.2.0"
 description = "Add your description here"
 authors = [{ name = "swilcox", email = "steven@wilcoxzone.com" }]
 dependencies = [
@@ -17,7 +17,7 @@ dependencies = [
     "keyboard>=0.13.5",
 ]
 readme = "README.md"
-requires-python = ">= 3.8"
+requires-python = ">= 3.11"
 
 [build-system]
 requires = ["hatchling"]
