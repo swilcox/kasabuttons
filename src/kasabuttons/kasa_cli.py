@@ -22,6 +22,7 @@ DEFAULT_CONFIG = "kasabuttons.toml"
 
 
 @click.command()
+@click.version_option()
 @click.option(
     "--config",
     default=DEFAULT_CONFIG,
