@@ -42,7 +42,7 @@ class KeyboardAsyncKeyboardStatus(BaseAsyncKeyboardStatus):
                 long_press = True
         except KeyError:
             logger.debug(f"{key} wasn't in keys_down")
-        if key == "c":
+        if key == "esc":
             self._loop.call_soon_threadsafe(
                 self._queue.put_nowait, ButtonEvent(long_press=False, character="exit")
             )
