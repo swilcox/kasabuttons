@@ -37,7 +37,7 @@ dev-dependencies = [
 ]
 
 [tool.ruff.lint]
-select = ["F", "E", "W", "I001"]
+select = ["F", "E", "W", "I"]
 
 [tool.hatch.metadata]
 allow-direct-references = true

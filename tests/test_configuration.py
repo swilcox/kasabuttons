@@ -1,5 +1,6 @@
-import pytest
 import tomllib
+
+import pytest
 from kasabuttons.configuration import Configuration
 
 

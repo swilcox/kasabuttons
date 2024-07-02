@@ -1,8 +1,8 @@
 import os
+import tomllib
 from enum import Enum
 from typing import Optional
 
-import tomllib
 import yaml
 from kasa import Credentials
 from pydantic import BaseModel
