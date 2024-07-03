@@ -9,18 +9,18 @@ Future versions, may also include support of GPIO buttons.
 
 ### Installation
 
-The project can be installed as a python package, `kasa-buttons`.
+The project can be installed as a python package, `kasabuttons`.
 
 Via `pipx`:
 
 ```shell
-pipx install kasa-buttons
+pipx install kasabuttons
 ```
 
 Or `rye`:
 
 ```shell
-rye install kasa-buttons
+rye install kasabuttons
 ```
 
 Or into you virtual environment using your preferred mechanism for installing python packages.
