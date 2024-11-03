@@ -1,6 +1,6 @@
 [project]
 name = "kasabuttons"
-version = "0.2.1"
+version = "0.3.0"
 description = "Add your description here"
 authors = [{ name = "swilcox", email = "steven@wilcoxzone.com" }]
 dependencies = [
