@@ -4,7 +4,7 @@ version = "0.2.1"
 description = "Add your description here"
 authors = [{ name = "swilcox", email = "steven@wilcoxzone.com" }]
 dependencies = [
-    "python-kasa>=0.7.0.dev1",
+    "python-kasa>=0.7.6",
     "pynput>=1.7.7",
     "python-dotenv>=1.0.1",
     "pydantic-settings>=2.2.1",
