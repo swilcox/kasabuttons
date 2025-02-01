@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import asyncio
 from unittest.mock import patch
 
 import pytest
@@ -145,9 +146,19 @@ async def test_create_core_and_loop(test_configuration):
             test_configuration, keyboard_handler=BaseAsyncKeyboardStatus
         )
         assert core is not None
+        assert core._update_thread is not None
+        assert core._update_thread.is_alive()
+
+        # Test exit cleanup
         core._button_queue.put_nowait(ButtonEvent(long_press=False, character="exit"))
         await core.loop()
-        assert True
+
+        # Verify thread cleanup was initiated
+        assert core._stop_update_thread is True
+        # Give the thread time to complete its current iteration and terminate
+        await asyncio.sleep(
+            0.1
+        )  # 100ms should be enough since we're not actually waiting 15min in tests
 
 
 @pytest.mark.asyncio
