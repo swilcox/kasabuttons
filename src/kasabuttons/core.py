@@ -1,6 +1,4 @@
 import asyncio
-import threading
-import time
 
 from kasa import Device, DeviceConfig, Discover, KasaException
 from loguru import logger
@@ -21,14 +19,16 @@ class KasaButtonsCore:
         self._last_device_config = None
         self._button_queue = None
         self._keyboard_handler_instance = None
-        self._update_thread = None
-        self._stop_update_thread = False
+        self._update_task = None
+        self._stop_update = False
 
-    def _background_update_task(self):
-        """Background thread task to update device list every 15 minutes"""
-        while not self._stop_update_thread:
-            asyncio.run(self.update_device_list())
-            time.sleep(self.configuration.refresh_frequency)  # default is 15 minutes
+    async def _background_update_task(self):
+        """Background task to update device list every 15 minutes"""
+        while not self._stop_update:
+            await self.update_device_list()
+            await asyncio.sleep(
+                self.configuration.refresh_frequency
+            )  # default is 15 minutes
 
     @classmethod
     async def create(
@@ -45,11 +45,8 @@ class KasaButtonsCore:
         )
         await self.update_device_list()
 
-        # Start background update thread
-        self._update_thread = threading.Thread(
-            target=self._background_update_task, daemon=True
-        )
-        self._update_thread.start()
+        # Start background update task
+        self._update_task = asyncio.create_task(self._background_update_task())
 
         return self
 
@@ -126,12 +123,14 @@ class KasaButtonsCore:
                     logger.exception("Attribute Error")
             elif button_event.character == "exit":
                 logger.debug("received 'exit' character")
-                self._stop_update_thread = True
-                if self._update_thread:
-                    # Wait for the thread to complete its current iteration
-                    self._update_thread.join(timeout=2)
-                    # If thread is still alive after timeout, we'll let it terminate naturally
-                    # since it's a daemon thread
+                self._stop_update = True
+                if self._update_task:
+                    # Cancel the update task
+                    self._update_task.cancel()
+                    try:
+                        await self._update_task
+                    except asyncio.CancelledError:
+                        pass
                 break
 
     async def update_device_list(self):

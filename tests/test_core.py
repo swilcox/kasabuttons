@@ -1,8 +1,8 @@
 from dataclasses import dataclass
-import asyncio
 from unittest.mock import patch
 
 import pytest
+
 from kasabuttons.buttons import ButtonEvent
 from kasabuttons.configuration import Configuration, DeviceAction
 from kasabuttons.core import KasaButtonsCore
@@ -146,19 +146,16 @@ async def test_create_core_and_loop(test_configuration):
             test_configuration, keyboard_handler=BaseAsyncKeyboardStatus
         )
         assert core is not None
-        assert core._update_thread is not None
-        assert core._update_thread.is_alive()
+        assert core._update_task is not None
+        assert not core._update_task.done()
 
         # Test exit cleanup
         core._button_queue.put_nowait(ButtonEvent(long_press=False, character="exit"))
         await core.loop()
 
-        # Verify thread cleanup was initiated
-        assert core._stop_update_thread is True
-        # Give the thread time to complete its current iteration and terminate
-        await asyncio.sleep(
-            0.1
-        )  # 100ms should be enough since we're not actually waiting 15min in tests
+        # Verify task cleanup was initiated
+        assert core._stop_update is True
+        assert core._update_task.cancelled()
 
 
 @pytest.mark.asyncio
